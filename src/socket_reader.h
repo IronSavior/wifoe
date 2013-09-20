@@ -12,19 +12,23 @@ namespace wifoe {
 
   class socket_reader {
     using clock = std::chrono::high_resolution_clock;
-    using event_signature = void (const std::vector<char>& packet );
-    using event_signal  = boost::signals2::signal<event_signature>;
-    using socket_signal_map = std::map<const sys::socket::cref, event_signal>;
+    using event_signature = void (const std::vector<char> packet );
+    using event_signal = boost::signals2::signal<event_signature>;
+    using socket_signal_map = std::map<sys::socket_handle, std::shared_ptr<event_signal>>;
     
     clock::duration timeout;
     socket_signal_map signals;
+    bool terminate_loop;
+    
+    const sys::socket_list socket_list() const;
   public:
-    boost::signals2::connection watch_socket( const sys::socket& sock, const event_signal::slot_type slot );
+    boost::signals2::connection watch_socket( const sys::socket_handle sock, const event_signal::slot_type slot );
     
     socket_reader() = delete;
     socket_reader( const clock::duration& timeout );
     
     void loop();
+    void end_loop();
   };
   
 } // namespace wifoe

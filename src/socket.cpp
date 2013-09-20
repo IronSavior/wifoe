@@ -9,6 +9,7 @@
 
 extern "C" {
   #include <arpa/inet.h>
+  #include <sys/types.h>
   #include <sys/socket.h>
   #include <netpacket/packet.h>
   #include <net/ethernet.h>
@@ -71,7 +72,7 @@ void socket::bind( const nic& iface ) const {
   }
 }
 
-void send_broadcast( const socket& sock, const nic& iface, const std::vector<char>& msg ) {
+void send_broadcast( const socket_handle& sock, const nic& iface, const std::vector<char>& msg ) {
   std::array<uint8_t, ETH_ALEN> bca{{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
   
   sockaddr_ll da = {0};
@@ -104,20 +105,30 @@ socket_list select_for_read( const socket_list& sockets, const clock::duration& 
   tv.tv_usec = (timeout % seconds(1)) / microseconds(1);
   
   FD_ZERO(&fds);
-  for( auto sockref : sockets ) {
-    auto& sock = sockref.get();
+  for( auto sock : sockets ) {
     max = (sock > max)? sock : max;
     FD_SET(sock, &fds);
   }
+  
   res = select(max+1, &fds, NULL, NULL, &tv );
   if( res < 0 ) {
     throw std::invalid_argument{std::string{strerror(errno)}};
   }
-  for( auto sockref : sockets ) {
-    auto& sock = sockref.get();
+  
+  for( auto sock : sockets ) {
     if( FD_ISSET(sock, &fds) ) socks.push_back(sock);
   }
+  
   return socks;
+}
+
+const std::vector<char> read_sock( const socket_handle& sock ) {
+  char buf[3000] = {0};
+  int len = ::recv(sock, buf, sizeof(buf), 0);
+  if( len < 0 ) {
+    throw std::invalid_argument{std::string{strerror(errno)}};
+  }
+  return {buf, buf + len};
 }
 
 } // namespace sys

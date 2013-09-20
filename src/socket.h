@@ -22,12 +22,11 @@ namespace sys {
     EXPERIMENTAL2
   };
   
+  using socket_handle = int;
+  
   class socket {
-    int fd;
+    socket_handle fd;
   public:
-    using  ref = std::reference_wrapper<socket>;
-    using cref = std::reference_wrapper<const socket>;
-    
     socket( const socket& src ) = delete;
     socket& operator=( const socket& src ) = delete;
     
@@ -44,15 +43,17 @@ namespace sys {
     void bind( const nic& iface ) const;
   };
 
-  using socket_list = std::vector<socket::cref>;
+  using socket_list = std::vector<socket_handle>;
 
-  void send_broadcast( const socket& sock, const nic& iface, const std::vector<char>& msg );
-  void send_raw( const socket& sock, const std::vector<char>& msg );
+  void send_broadcast( const socket_handle& sock, const nic& iface, const std::vector<char>& msg );
+  void send_raw( const socket_handle& sock, const std::vector<char>& msg );
   
   socket_list select_for_read(
     const socket_list& sockets,
     const clock::duration& timeout = clock::duration::zero()
   );
+  
+  const std::vector<char> read_sock( const socket_handle& );
   
 } // namespace sys
 

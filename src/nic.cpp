@@ -12,7 +12,7 @@ namespace sys {
   
 unsigned int nic_index( const std::string& name ) {
   int idx = 0;
-  if( idx = if_nametoindex(name.c_str()) == 0 ) {
+  if( (idx = if_nametoindex(name.c_str())) == 0 ) {
     throw std::invalid_argument{std::string{strerror(errno)}};
   }
   return idx;
