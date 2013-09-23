@@ -87,8 +87,10 @@ void send_broadcast( const socket_handle& sock, const nic& iface, const std::vec
   }
 }
 
-void send_raw( const socket& sock, const std::vector<char>& msg ){
-  throw std::invalid_argument{"not really implemented yet"};
+void send_raw( const socket_handle& sock, const std::vector<char>& msg ){
+  if( send(sock, msg.data(), msg.size(), 0) < 0 ) {
+    throw std::invalid_argument{std::string{strerror(errno)}};
+  }
 }
 
 socket_list select_for_read( const socket_list& sockets, const clock::duration& timeout ) {
@@ -122,7 +124,7 @@ socket_list select_for_read( const socket_list& sockets, const clock::duration& 
   return socks;
 }
 
-const std::vector<char> read_sock( const socket_handle& sock ) {
+std::vector<char> read_sock( const socket_handle& sock ) {
   char buf[3000] = {0};
   int len = ::recv(sock, buf, sizeof(buf), 0);
   if( len < 0 ) {

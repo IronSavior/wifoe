@@ -53,7 +53,9 @@ namespace sys {
     const clock::duration& timeout = clock::duration::zero()
   );
   
-  const std::vector<char> read_sock( const socket_handle& );
+  std::vector<char> read_sock( const socket_handle& );
+  
+  void set_send_buffer_size( const socket_handle& sock, const unsigned int bufsize );
   
 } // namespace sys
 

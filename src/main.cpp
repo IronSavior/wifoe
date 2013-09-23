@@ -30,22 +30,25 @@ int main( int argc, char** argv ) {
   
   sock_reader.watch_socket(mon_sock,
     [&dist_sock, &dist_iface]( const std::vector<char> packet ) {
-      std::cout << "Monitor read event: " << packet.size() << std::endl;
+      if( packet.size() > 1500 ) {
+        std::cout << "Monitor read event: " << packet.size() << std::endl;
+      }
+      sys::send_broadcast(dist_sock, dist_iface, packet);
     }
   );
   std::cout << "Monitor Socket watch added" << std::endl;
 
   sock_reader.watch_socket(dist_sock,
-    []( const std::vector<char> packet ) {
-      std::cout << "Distribution read event: " << packet.size() << std::endl;
+    [&mon_sock]( const std::vector<char> packet ) {
+      if( packet.size() > 1500 ) {
+        std::cout << "Distribution read event: " << packet.size() << std::endl;
+      }
+      sys::send_raw(mon_sock, packet);
     }
   );
   std::cout << "Distribution Socket watch added" << std::endl;
 
-  try {
-    sock_reader.loop();
-  }
-  catch( std::exception e ) {}
+  sock_reader.loop();
   
   std::cout << std::endl << "Loop Interrupted." << std::endl;
   return 0;
