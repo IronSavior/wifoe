@@ -72,7 +72,7 @@ void socket::bind( const nic& iface ) const {
   }
 }
 
-void send_broadcast( const socket_handle& sock, const nic& iface, const std::vector<char>& msg ) {
+void send_broadcast( const socket_handle& sock, const nic& iface, const std::vector<unsigned char>& msg ) {
   std::array<uint8_t, ETH_ALEN> bca{{0xff, 0xff, 0xff, 0xff, 0xff, 0xff}};
   
   sockaddr_ll da = {0};
@@ -87,7 +87,7 @@ void send_broadcast( const socket_handle& sock, const nic& iface, const std::vec
   }
 }
 
-void send_raw( const socket_handle& sock, const std::vector<char>& msg ){
+void send_raw( const socket_handle& sock, const std::vector<unsigned char>& msg ){
   if( send(sock, msg.data(), msg.size(), 0) < 0 ) {
     throw std::invalid_argument{std::string{strerror(errno)}};
   }
@@ -124,7 +124,7 @@ socket_list select_for_read( const socket_list& sockets, const clock::duration& 
   return socks;
 }
 
-std::vector<char> read_sock( const socket_handle& sock ) {
+std::vector<unsigned char> read_sock( const socket_handle& sock ) {
   char buf[3000] = {0};
   int len = ::recv(sock, buf, sizeof(buf), 0);
   if( len < 0 ) {

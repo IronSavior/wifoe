@@ -45,15 +45,15 @@ namespace sys {
 
   using socket_list = std::vector<socket_handle>;
 
-  void send_broadcast( const socket_handle& sock, const nic& iface, const std::vector<char>& msg );
-  void send_raw( const socket_handle& sock, const std::vector<char>& msg );
+  void send_broadcast( const socket_handle& sock, const nic& iface, const std::vector<unsigned char>& msg );
+  void send_raw( const socket_handle& sock, const std::vector<unsigned char>& msg );
   
   socket_list select_for_read(
     const socket_list& sockets,
     const clock::duration& timeout = clock::duration::zero()
   );
   
-  std::vector<char> read_sock( const socket_handle& );
+  std::vector<unsigned char> read_sock( const socket_handle& );
   
   void set_send_buffer_size( const socket_handle& sock, const unsigned int bufsize );
   

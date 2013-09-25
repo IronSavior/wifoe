@@ -12,7 +12,7 @@ namespace wifoe {
 
   class socket_reader {
     using clock = std::chrono::high_resolution_clock;
-    using event_signature = void (const std::vector<char> packet );
+    using event_signature = void (const std::vector<unsigned char> packet );
     using event_signal = boost::signals2::signal<event_signature>;
     using socket_signal_map = std::map<sys::socket_handle, std::shared_ptr<event_signal>>;
     

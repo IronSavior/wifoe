@@ -3,7 +3,7 @@ SOURCES := $(wildcard src/*.c*) $(wildcard src/**/*.c*)
 BASE_NAME := wifoe
 
 OUTPUT_NAME ?= $(BASE_NAME)
-#BOOST_LIBS ?= program_options
+BOOST_LIBS ?= program_options regex
 PKGCONFIG_LIBS ?= libnl-3.0 libnl-genl-3.0
 
 LDLIBS ?= $(addprefix -lboost_, $(BOOST_LIBS)) $(shell pkg-config --libs-only-l $(PKGCONFIG_LIBS)) -lstdc++
