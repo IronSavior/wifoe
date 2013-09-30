@@ -11,14 +11,14 @@ class Config {
   boost::program_options::options_description _desc;
   boost::program_options::variables_map       _vars;
 
-  std::string     _src_addr;
+  std::vector<std::string>     _src_addrs;
 
 public:
   bool            help;
   std::string     wifi_iface;
   std::string     dist_iface;
   
-  std::vector<unsigned char>  src_addr;
+  std::vector<std::vector<unsigned char>>  src_addrs;
   
   const boost::program_options::options_description desc();
   

@@ -22,7 +22,7 @@ std::string mac_to_str( const std::vector<unsigned char> mac ) {
   return ss.str();
 }
 
-bool check_source_address( const std::vector<unsigned char> packet, const std::vector<unsigned char> target_addr ) {
+bool check_source_address( const std::vector<unsigned char> packet, const std::vector<std::vector<unsigned char>> target_addrs ) {
   ieee80211_radiotap_iterator iter;
 
   if( ieee80211_radiotap_iterator_init(&iter, (ieee80211_radiotap_header*)packet.data(), packet.size(), NULL) ) {
@@ -32,18 +32,21 @@ bool check_source_address( const std::vector<unsigned char> packet, const std::v
   
   auto tx_addr_start = packet.begin() + iter._max_length + 10; // 2 bytes FC, 2 bytes duration, 6 bytes addr1
   std::vector<unsigned char> tx_addr(tx_addr_start, tx_addr_start + 6);
-  return target_addr == tx_addr;
+  //std::cout << "trying to match: " << mac_to_str(tx_addr) << std::endl;
+  for( auto addr : target_addrs ) {
+    //std::cout << mac_to_str(addr) << std::endl;
+    if( addr == tx_addr ) return true;
+  }
+  return false;
 }
 
 static wifoe::socket_reader* g_sock_reader = nullptr;
 void sig_handler( int sig ) {
-  if( g_sock_reader != nullptr ) {
-    g_sock_reader->end_loop();
-  }
+  if( g_sock_reader != nullptr ) g_sock_reader->end_loop();
 }
 
 int main( int argc, char** argv ) {
-  Config conf(argc, argv);
+  Config conf{argc, argv};
   
   if( conf.help ) {
     std::cout << conf.desc() << std::endl;
@@ -66,7 +69,7 @@ int main( int argc, char** argv ) {
   
   sock_reader.watch_socket(mon_sock,
     [&dist_sock, &dist_iface, &conf]( const std::vector<unsigned char> packet ) {
-      if( check_source_address(packet, conf.src_addr) ) {
+      if( check_source_address(packet, conf.src_addrs) ) {
         std::cout << "Monitor read event: " << packet.size() << std::endl;
         sys::send_broadcast(dist_sock, dist_iface, packet);
       }
@@ -82,8 +85,9 @@ int main( int argc, char** argv ) {
   );
   std::cout << "Distribution Socket watch added" << std::endl;
 
+  std::cout << "Starting event loop." << std::endl;
   sock_reader.loop();
   
-  std::cout << std::endl << "Loop Interrupted." << std::endl;
+  std::cout << std::endl << "Loop ended." << std::endl;
   return 0;
 }
